@@ -1,0 +1,30 @@
+diff -up imlib2-1.6.1/src/modules/loaders/loader_ico.c.overflow imlib2-1.6.1/src/modules/loaders/loader_ico.c
+--- imlib2-1.6.1/src/modules/loaders/loader_ico.c.overflow	2020-05-21 09:42:21.592650197 +0200
++++ imlib2-1.6.1/src/modules/loaders/loader_ico.c	2020-05-21 09:45:06.339214806 +0200
+@@ -8,6 +8,7 @@
+ #include "loader_common.h"
+ 
+ #include <string.h>
++#include <limits.h>
+ 
+ #define DEBUG 0
+ #if DEBUG
+@@ -168,6 +169,8 @@ ico_read_icon(ico_t * ico, int ino)
+      case 4:
+      case 8:
+         D("Allocating a %d slot colormap\n", ie->bih.colors);
++        if (UINT_MAX / sizeof(DATA32) < ie->bih.colors)
++           goto bail;
+         size = ie->bih.colors * sizeof(DATA32);
+         ie->cmap = malloc(size);
+         nr = fread(ie->cmap, 1, size, ico->fp);
+@@ -183,6 +186,9 @@ ico_read_icon(ico_t * ico, int ino)
+      }
+ 
+    size = ((ie->bih.bpp * ie->w + 31) / 32 * 4) * ie->h;
++   if (!IMAGE_DIMENSIONS_OK(ie->w, ie->h) || ie->bih.bpp == 0 ||
++       UINT_MAX / ie->bih.bpp < ie->w * ie->h)
++      goto bail;
+    ie->pxls = malloc(size);
+    nr = fread(ie->pxls, 1, size, ico->fp);
+    if (nr != size)
