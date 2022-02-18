@@ -1,0 +1,14 @@
+--- imlib2-1.8.0/src/modules/loaders/loader_jpeg.c	2022-01-21 09:27:44.000000000 +0100
++++ imlib2-1.8.0-patched/src/modules/loaders/loader_jpeg.c	2022-02-18 11:43:54.171797497 +0100
+@@ -319,6 +319,11 @@
+    /* set up jepg compression parameters */
+    jpeg_set_defaults(&jcs);
+    jpeg_set_quality(&jcs, quality, TRUE);
++
++   /* progressive */
++   if ((tag = __imlib_GetTag(im, "interlacing")) && tag->val)
++       jpeg_simple_progression(&jcs);
++
+    jpeg_start_compress(&jcs, TRUE);
+    /* get the start pointer */
+    ptr = im->data;
